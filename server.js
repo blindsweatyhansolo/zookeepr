@@ -55,6 +55,12 @@ function filterByQuery(query, animalsArray) {
     return filteredResults;
 };
 
+function findById(id, animalsArray) {
+    const result = animalsArray.filter(animal => animal.id === id)[0];
+
+    return result;
+};
+
 // route that the front-end can request data from
 // get() requires two arguments:
 // 1) string that describes the route the client will have to fetch from
@@ -65,12 +71,25 @@ app.get('/api/animals', (req, res) => {
     let results = animals;
 
     // if there is a query request, results will now be returned array from filterByQuery()
+    // req.query is multifaceted, often combining multiple parameters
     if (req.query) {
         results = filterByQuery(req.query, results);
     }
 
     // res.json() method sends json file, changes HTTP headers 
     res.json(results);
+});
+
+app.get('/api/animals/:id', (req, res) => {
+    // (compared to req.query) req.params is specific to a single property, often intended to retrieve a single record
+    const result = findById(req.params.id, animals);
+    
+    // if no matching result, send 404 error code
+    if (result) {
+        res.json(result);
+    } else {
+        res.send(404);
+    }
 });
 
 // listen() = method to make server listen for requests
