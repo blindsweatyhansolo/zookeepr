@@ -1,11 +1,11 @@
 // instantiate the server
 const express = require('express');
+const { animals } = require('./data/animals');
 // When Heroku runs our app, it sets an environment variable called process.env.PORT
 // We're going to tell our app to use that port, if it has been set, and if not, default to port 80
 const PORT = process.env.PORT || 3001;
 // assign express() to 'app' variablein order to chain on methods to the Express.js server later
 const app = express();
-const { animals } = require('./data/animals');
 
 // filter functionality (creating query endpoints)
 // takes req.query as argument, filters through the animals accordingly returning new array
@@ -93,6 +93,7 @@ app.get('/api/animals/:id', (req, res) => {
 });
 
 // listen() = method to make server listen for requests
+// can be placed at any point after 'app' is declared
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
 });
