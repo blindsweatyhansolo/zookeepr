@@ -1,3 +1,6 @@
+const fs = require('fs');
+// 'path' module provides utilities for working with file and directory paths, makes working with fs more predictable
+const path = require('path');
 // instantiate the server
 const express = require('express');
 const { animals } = require('./data/animals');
@@ -6,6 +9,16 @@ const { animals } = require('./data/animals');
 const PORT = process.env.PORT || 3001;
 // assign express() to 'app' variablein order to chain on methods to the Express.js server later
 const app = express();
+// !! BOTH OF THE NEXT TWO FUNCTIONS MUST BE SET UP EVERYTIME YOU CREATE A SERVER THAT ACCEPTS POST DATA !!
+// app.use() method mounts a function (middleware) to the server that requests pass through
+// before getting to the intended endpoint
+// ^^ express.urlencoded({ extended: true }) method that takes incoming POST data and converts it to key/value pairs
+// that can be accessed in the req.body object; {extended:true} option informs server that there may be nested sub-arry data
+// parse incoming string or array data //
+app.use(express.urlencoded({ extended: true }));
+// express.json() takes incoming POST date in the from of JSON and parses it into the req.body JS object
+// parse incoming JSON data //
+app.use(express.json());
 
 // filter functionality (creating query endpoints)
 // takes req.query as argument, filters through the animals accordingly returning new array
@@ -61,6 +74,25 @@ function findById(id, animalsArray) {
     return result;
 };
 
+// function that accepts the POST route's req.body value (body) and the array that the data will be added to (animalsArray)
+function createNewAnimal(body, animalsArray) {
+    const animal = body;
+    animalsArray.push(animal);
+
+    // write to animals.json
+    // writes animals.json in the data subdirectory with path.join()
+    // __dirname represents the directory of the file we execute the code in, joins with the path to animals.json
+    // array data saved/converted to JSON with stringify()
+    // null argument means we don't want to edit any of the existing data
+    // 2 indicates we want to create white space between our values more readibility
+    fs.writeFileSync(path.join(__dirname, './data/animals.json'),
+    JSON.stringify({ animals: animalsArray }, null, 2)
+    );
+
+    // return finished code to post route for response
+    return animal;
+};
+
 // route that the front-end can request data from
 // get() requires two arguments:
 // 1) string that describes the route the client will have to fetch from
@@ -80,6 +112,7 @@ app.get('/api/animals', (req, res) => {
     res.json(results);
 });
 
+// route to the front-end that can request data using the id
 app.get('/api/animals/:id', (req, res) => {
     // (compared to req.query) req.params is specific to a single property, often intended to retrieve a single record
     const result = findById(req.params.id, animals);
@@ -90,6 +123,20 @@ app.get('/api/animals/:id', (req, res) => {
     } else {
         res.send(404);
     }
+});
+
+// route that listens for POST requests, accepts data to be used/stored server-side
+// post() represents the action of a client requesting the server
+// to accept data rather than vice versa with get()
+app.post('/api/animals', (req, res) => {
+    // req.body is where our incoming content will be
+    // set id based on what the next index of the array will be
+    req.body.id = animals.length.toString();
+    
+    // add animal to json file and animals array in this function
+    const animal = createNewAnimal(req.body, animals)
+
+    res.json(animal);
 });
 
 // listen() = method to make server listen for requests
