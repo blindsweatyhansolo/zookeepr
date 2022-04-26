@@ -4,11 +4,13 @@ const path = require('path');
 // instantiate the server
 const express = require('express');
 const { animals } = require('./data/animals');
+
 // When Heroku runs our app, it sets an environment variable called process.env.PORT
 // We're going to tell our app to use that port, if it has been set, and if not, default to port 80
 const PORT = process.env.PORT || 3001;
 // assign express() to 'app' variablein order to chain on methods to the Express.js server later
 const app = express();
+
 // !! BOTH OF THE NEXT TWO FUNCTIONS MUST BE SET UP EVERYTIME YOU CREATE A SERVER THAT ACCEPTS POST DATA !!
 // app.use() method mounts a function (middleware) to the server that requests pass through
 // before getting to the intended endpoint
@@ -93,6 +95,23 @@ function createNewAnimal(body, animalsArray) {
     return animal;
 };
 
+// function to validate POST data
+function validateAnimal(animal) {
+    if (!animal.name || typeof animal.name !== 'string') {
+        return false;
+    }
+    if (!animal.species || typeof animal.species !== 'string') {
+        return false;
+    }
+    if (!animal.diet || typeof animal.diet !== 'string') {
+        return false;
+    }
+    if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+        return false;
+    }
+    return true;
+};
+
 // route that the front-end can request data from
 // get() requires two arguments:
 // 1) string that describes the route the client will have to fetch from
@@ -133,10 +152,17 @@ app.post('/api/animals', (req, res) => {
     // set id based on what the next index of the array will be
     req.body.id = animals.length.toString();
     
-    // add animal to json file and animals array in this function
-    const animal = createNewAnimal(req.body, animals)
-
-    res.json(animal);
+    // if any data in req.body is incorrect, send 400 error
+    if (!validateAnimal(req.body)) {
+        // method relays message to client with code and explanation of what went wrong
+        // anything in 400 range is a user error, not server error
+        res.status(400).send('The animal is not properly formatted.');
+    } else {
+        // add animal to json file and animals array in this function
+        const animal = createNewAnimal(req.body, animals)
+    
+        res.json(animal);
+    }
 });
 
 // listen() = method to make server listen for requests
