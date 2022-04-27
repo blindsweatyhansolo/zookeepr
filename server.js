@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3001;
 // assign express() to 'app' variablein order to chain on methods to the Express.js server later
 const app = express();
 
-// !! BOTH OF THE NEXT TWO FUNCTIONS MUST BE SET UP EVERYTIME YOU CREATE A SERVER THAT ACCEPTS POST DATA !!
+// !! ALL app.use() FUNCTIONS MUST BE SET UP EVERYTIME YOU CREATE A SERVER THAT ACCEPTS POST DATA !!
 // app.use() method mounts a function (middleware) to the server that requests pass through
 // before getting to the intended endpoint
 // ^^ express.urlencoded({ extended: true }) method that takes incoming POST data and converts it to key/value pairs
@@ -21,6 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 // express.json() takes incoming POST date in the from of JSON and parses it into the req.body JS object
 // parse incoming JSON data //
 app.use(express.json());
+// express.static() is middleware that instructs the server to make certain files readily available (not stuck behind server endpoint)
+// this ensures that all style sheets, js sheets, images, etc (everything in client facing 'public' folder) are ready
+// for use so that individual routes do not have to be created; !! USE FOR SERVERS SERVING FRONT END AS WELL AS JSON DATA !!
+app.use(express.static('public'));
 
 // filter functionality (creating query endpoints)
 // takes req.query as argument, filters through the animals accordingly returning new array
@@ -163,6 +167,33 @@ app.post('/api/animals', (req, res) => {
     
         res.json(animal);
     }
+});
+
+// !! ROUTE ORDERS MATTER !!
+// GET route for index.html
+// '/' points to root route of server, since index is the root page
+app.get('/', (req, res) => {
+    // res.sendFile() sends the index.html to be displayed on the page
+    // path module used to ensure the correct location is found for display
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+// GET route for animals.html
+// '/animals' instead of adding '/api/animals' is more professional 
+app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+// GET route for zookeepers.html
+app.get('/zookeepers', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// GET wildcard route (for when a client tries to visit a non-existent route) goes to index.html
+// '*' (star) acts as a wildcard (any route not previously defined falls under this request)
+// !! SHOULD ALWAYS COME LAST !! //
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 // listen() = method to make server listen for requests
