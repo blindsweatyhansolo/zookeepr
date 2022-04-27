@@ -12,6 +12,10 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 
 // !! ALL app.use() FUNCTIONS MUST BE SET UP EVERYTIME YOU CREATE A SERVER THAT ACCEPTS POST DATA !!
+// express.static() is middleware that instructs the server to make certain files readily available (not stuck behind server endpoint)
+// this ensures that all style sheets, js sheets, images, etc (everything in client facing 'public' folder) are ready
+// for use so that individual routes do not have to be created; !! USE FOR SERVERS SERVING FRONT END AS WELL AS JSON DATA !!
+app.use(express.static('public'));
 // app.use() method mounts a function (middleware) to the server that requests pass through
 // before getting to the intended endpoint
 // ^^ express.urlencoded({ extended: true }) method that takes incoming POST data and converts it to key/value pairs
@@ -21,10 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 // express.json() takes incoming POST date in the from of JSON and parses it into the req.body JS object
 // parse incoming JSON data //
 app.use(express.json());
-// express.static() is middleware that instructs the server to make certain files readily available (not stuck behind server endpoint)
-// this ensures that all style sheets, js sheets, images, etc (everything in client facing 'public' folder) are ready
-// for use so that individual routes do not have to be created; !! USE FOR SERVERS SERVING FRONT END AS WELL AS JSON DATA !!
-app.use(express.static('public'));
 
 // filter functionality (creating query endpoints)
 // takes req.query as argument, filters through the animals accordingly returning new array
