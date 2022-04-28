@@ -126,6 +126,17 @@
         "hungry"
       ],
       "id": "12"
+    },
+    {
+      "name": "Bobby",
+      "species": "baboon",
+      "diet": "omnivore",
+      "personalityTraits": [
+        "zany",
+        "anxious",
+        "goofy"
+      ],
+      "id": "13"
     }
   ]
 }
